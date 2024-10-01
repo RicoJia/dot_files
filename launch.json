@@ -1,0 +1,40 @@
+{
+    // Pytest configuration. Put this file in a VSCode workspace, then hit F5. 
+    // You might need to pause the test, and select Uncaught Exceptions in Breakpoints 
+    // to catch failures
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Pytest: Current File",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": ["${file}"],
+            "justMyCode": true,
+            "stopOnEntry": false,
+            "env": {
+                "PYTHONBREAKPOINT": "pdb.set_trace"
+            }
+        },
+        {
+            "name": "Pytest: Current Directory",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": ["${relativeFileDirname}"],
+            "justMyCode": true,
+            "stopOnEntry": false,
+            "env": {
+                "PYTHONBREAKPOINT": "pdb.set_trace"
+            }
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

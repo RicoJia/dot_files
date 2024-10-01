@@ -1,0 +1,285 @@
+# rename this to ~/.ssh/config. 
+# Then for one repo, change the repo's origin to git remote set-url origin git@github-personal:USER/REPOSITORY.git
+# see this https://gist.github.com/oanhnn/80a89405ab9023894df7
+# Note that you need 
+#   1. ssh-add ~/.ssh/key
+#   2. ssh -T git@github-work for testing, 
+#   3. download, git clone git@github-work:...
+Host github-personal
+  HostName github.com
+  User ricojia
+  IdentityFile ~/.ssh/personal
+  IdentitiesOnly yes
+
+Host github-work
+  HostName github.com
+  User rico-jia
+  IdentityFile ~/.ssh/work_ed25519
+  IdentitiesOnly yes
+  
+# use this when you pull from personal account
+# Host github.com
+#   HostName github.com
+#   User ricojia
+#   IdentityFile ~/.ssh/ricoruotongjia
+#   IdentitiesOnly yes
+#
+
+# Host github.com
+#   HostName github.com
+#   User ricocoyeah
+#   IdentityFile ~/.ssh/work_ed25519
+#   IdentitiesOnly yes
+#
+# Host moxi*
+#   SendEnv GIT_*
+# Host moxi4
+#   Hostname localhost
+#   User moxi
+#   Port 20004
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi5
+#  Hostname localhost
+#  User moxi
+#  Port 20005
+#  ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi1
+#   Hostname localhost
+#   User moxi
+#   Port 19991
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi2
+#   Hostname localhost
+#   User moxi
+#   Port 19992
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi6
+#   Hostname localhost
+#   User moxi
+#   Port 20006
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi7
+#   Hostname localhost
+#   User moxi
+#   Port 20007
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi3
+#   Hostname localhost
+#   User moxi
+#   Port 20003
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi8
+#   Hostname localhost
+#   User moxi
+#   Port 20008
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi9
+#   Hostname localhost
+#   User moxi
+#   Port 20009
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi10
+#   Hostname localhost
+#   User moxi
+#   Port 20010
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi11
+#   Hostname localhost
+#   User moxi
+#   Port 20011
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi12
+#   Hostname localhost
+#   User moxi
+#   Port 20012
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi13
+#   Hostname localhost
+#   User moxi
+#   Port 20013
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi14
+#   Hostname localhost
+#   User moxi
+#   Port 20014
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi15
+#   Hostname localhost
+#   User moxi
+#   Port 20015
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi18
+#   Hostname localhost
+#   User moxi
+#   Port 20018
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi19
+#   Hostname localhost
+#   User moxi
+#   Port 20019
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host moxi21
+#   Hostname localhost
+#   User moxi
+#   Port 20021
+#   ProxyCommand ssh new_proxy -W %h:%p
+# Host new_proxy
+#   Hostname 52.89.112.132
+#   Port 8899
+Host "sn?", "sn??"
+  User moxi
+Host sn3
+  HostName 172.86.160.43
+Host sn4
+  HostName 172.86.160.31
+Host sn5
+  HostName 172.86.160.10
+Host sn6
+  HostName 172.86.160.17
+Host sn7
+  HostName 172.86.160.46
+Host sn8
+  HostName 172.86.160.47
+Host sn9
+  HostName 172.86.160.54
+Host sn10
+  HostName 172.86.160.76
+Host sn11
+  HostName 172.86.160.34
+Host sn12
+  HostName 172.86.160.89
+Host sn13
+  HostName 172.86.160.96
+Host sn14
+  HostName 172.86.160.112
+Host sn15
+  HostName 172.86.160.116
+Host sn16
+  HostName 172.86.160.121
+Host sn17
+  HostName 172.86.160.128
+Host sn18
+  HostName 172.86.160.133
+Host sn19
+  HostName 172.86.160.136
+Host sn20
+  HostName 172.86.160.37
+Host sn21
+  HostName 172.86.160.21
+Host sn22
+  HostName 172.86.160.119
+Host sn23
+  HostName 172.86.160.122
+Host sn24
+  HostName 172.86.160.141
+Host sn25
+  HostName 172.86.160.147
+Host sn26
+  HostName 172.86.160.27
+Host sn27
+  HostName 172.86.160.35
+Host sn28
+  HostName 172.86.160.50
+Host sn29
+  HostName 172.86.160.56
+Host sn30
+  HostName 172.86.160.32
+Host sn31
+  HostName 172.86.160.48
+Host sn32
+  HostName 172.86.160.59
+Host sn33
+  HostName 172.86.160.77
+
+Host moxi_local
+  User moxi
+  HostName 172.42.42.94
+
+Host robot_proxy
+  HostName 52.89.112.132
+  Port 8899
+
+Host "moxi?", "moxi??"
+  Hostname localhost
+  User moxi
+  ProxyCommand ssh robot_proxy -W %h:%p
+  PreferredAuthentications password
+  PubkeyAuthentication no
+Host moxi1
+  Port 19991
+Host moxi2
+  Port 19992
+Host moxi3
+  Port 20003
+Host moxi4
+  Port 20004
+Host moxi5
+  Port 20005
+Host moxi6
+  Port 20006
+Host moxi7
+  Port 20007
+Host moxi8
+  Port 20008
+Host moxi9
+  Port 20009
+Host moxi10
+  Port 20010
+Host moxi11
+  Port 20011
+Host moxi12
+  Port 20012
+Host moxi13
+  Port 20013
+Host moxi14
+  Port 20014
+Host moxi15
+  Port 20015
+Host moxi16
+  Port 20016
+Host moxi17
+  Port 20017
+Host moxi18
+  Port 20018
+Host moxi19
+  Port 20019
+Host moxi20
+  Port 20020
+Host moxi21
+  Port 20021
+Host moxi22
+  Port 20022
+Host moxi23 
+  Port 20023
+Host moxi24
+  Port 20024
+Host moxi25
+  Port 20025
+Host moxi26
+  Port 20026
+Host moxi27
+  Port 20027
+Host moxi28
+  Port 20028
+Host moxi29
+  Port 20029
+Host moxi30
+  Port 20030
+Host moxi31
+  Port 20031
+Host moxi32
+  Port 20032
+Host moxi33
+  Port 20033
+
+# logstash server
+Host bastion.dev.diligentrobots.io
+
+Host bastion.prod.diligentrobots.io
+
+Host *.dev.diligentrobots.internal
+  ProxyCommand ssh -W %h:%p -q bastion.dev.diligentrobots.io
+Host *.prod.diligentrobots.internal
+  ProxyCommand ssh -W %h:%p -q bastion.prod.diligentrobots.io
+Host *.staging.diligentrobots.internal
+  ProxyCommand ssh -W %h:%p -q bastion.prod.diligentrobots.io

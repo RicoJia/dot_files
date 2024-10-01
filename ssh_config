@@ -1,0 +1,31 @@
+# rename this to ~/.ssh/config. 
+# Then for one repo, change the repo's origin to git remote set-url origin git@github-personal:USER/REPOSITORY.git
+# see this https://gist.github.com/oanhnn/80a89405ab9023894df7
+# Note that you need 
+#   1. ssh-add ~/.ssh/key
+#   2. ssh -T git@github-work for testing, 
+#   3. download, git clone git@github-work:...
+Host github-personal
+  HostName github.com
+  User ricojia
+  IdentityFile ~/.ssh/personal
+  IdentitiesOnly yes
+
+Host github-work
+  HostName github.com
+  User rico-jia
+  IdentityFile ~/.ssh/work
+  IdentitiesOnly yes
+  
+# use this when you pull from personal account
+# Host github.com
+#   HostName github.com
+#   User ricojia
+#   IdentityFile ~/.ssh/ricoruotongjia
+#   IdentitiesOnly yes
+#
+Host github.com
+  HostName github.com
+  User ricocoyeah
+  IdentityFile ~/.ssh/work
+  IdentitiesOnly yes
