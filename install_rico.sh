@@ -47,16 +47,40 @@ install_barebone(){
 	echo ${CURRENT_DIR}/vimrc
 	cp ${CURRENT_DIR}/vimrc /home/${USER}/.vimrc
 	cp ${CURRENT_DIR}/bashrc /home/${USER}/.bashrc
-    INPUT_RC=""
-# TODO
-	#sudo apt-get update
-	#sudo apt-get upgrade
+    # TODO
+
+	sudo apt-get update
+	sudo apt-get upgrade
     # install vim plug
     curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
     # this is for clipboard
 	sudo apt-get install -y vim-gtk
+
+    inputrc_config="
+    # Enable case-insensitive completion
+    set completion-ignore-case on
+
+    # Show all matches for ambiguous patterns at once
+    set show-all-if-ambiguous on
+
+    # Enable visible bell (no sound)
+    set bell-style visible
+
+    # Use the up and down arrows to search through command history
+    \"\\e[A\": history-search-backward
+    \"\\e[B\": history-search-forward
+    "
+
+    # Create or append to the ~/.inputrc file
+    echo "$inputrc_config" >> /home/$USER/.inputrc
+
+    # Optionally, you can reload the ~/.inputrc without logging out:
+    bind -f ~/.inputrc
+
+    echo "The ~/.inputrc file has been updated."
+
 }
 
 install_terminator(){
