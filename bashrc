@@ -139,7 +139,7 @@ function gsub_update_rico(){
 ###############################################
 # Personal
 ###############################################
-source ~/file_exchange_port/Fun_Projects/Junior_Project/junior_ws/devel/setup.bash
+# source ~/file_exchange_port/Fun_Projects/Junior_Project/junior_ws/devel/setup.bash
 
 function cp_rcs(){
     cp /home/${USER}/.bashrc /home/${USER}/file_exchange_port/Books_Dotfiles/dot_files/bashrc
