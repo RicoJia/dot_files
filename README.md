@@ -1,3 +1,7 @@
+## Usage
+
+- `./install_rico.sh` is the script that "runs 'em all". This is mainly for personaly uses, so before running it, please make sure the right components are run.
+
 ## Vim 
 ### Coc extensions
 - ccls: Follow [Coc installation guide ](https://codevion.github.io/#!vim/coc.md) for guides installing Coc
