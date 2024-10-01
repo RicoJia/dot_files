@@ -131,71 +131,11 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 
 alias pdfstudio2022='~/pdfstudio2022/pdfstudio2022'
-############################Moxi
-
-source /opt/ros/noetic/setup.bash
-export MOXI_DEV=~/repos/moxi_dev
-export PATH=$MOXI_DEV/scripts:~/repos/do-diligent/tools:$PATH
-export PATH=~/repos/do-diligent/ansible/roles/roc_machine_provisioning/files/opt/diligent/bin:$PATH
-source $MOXI_DEV/diligent_ws/devel/setup.bash
-export WORK_DILIGENT="/home/rjia/file_exchange_port/Work/diligent"
-parse_git_branch() {
-     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
-}
-export PS1="\[\e[1;32m\]\u@\h\[\e[1;34m\]:\w \[\e[1;95m\]\$(parse_git_branch)\[\e[00m\]$ "
-
-
-moxi_home(){
-	cd $MOXI_DEV
-}
 
 function gsub_update_rico(){
 	git submodule update --init --recursive
 }
-export MOXI_LOCAL_IP="172.42.42.94"
-sshmoxi() {
-    ssh -o StrictHostKeyChecking=no "moxi@${MOXI_LOCAL_IP}"
-}
-
-sshmoxin() {
-    ssh-keygen -f ~/.ssh/known_hosts -R "${MOXI_LOCAL_IP}"
-    sshmoxi
-}
-
-copysshmoxi() {
-    ssh-copy-id "moxi@${MOXI_LOCAL_IP}"
-}
-
-fire_host() {
-	export FIRESTORE_EMULATOR_HOST=$1:8080
-}
-
-fire_emulate() 
-{
-	export EMULATOR_SRC_SITE=$1
-	export EMULATOR_SRC_PROJECT_ID=central-datastore-$2
-}
-alias stop_firebase='ps -aux | grep firebase | grep -v grep | tr -s '\'' '\'' | cut -f 2 -d '\'' '\'' | xargs kill'
-export PATH=${PATH}:/home/rjia/.local/bin
-export PATH=${PATH}:/home/rjia/repos/do-diligent/tools # Install crowbar
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-export SEMANTIC_DATA_BACKUPS=~/repos/semantic_data_backups
-export MOXI_RPI_PATH=~/repos/moxi_rpi
-export PATH=${PATH}:/home/rjia/.local/bin
-export PATH=${PATH}:/home/rjia/repos/do-diligent/tools # Install crowbar
-export RJJE_ARM_PATH=/home/rjia/file_exchange_port/Fun_Projects/RJJE_Arm/rjje_arm_ws
-export OVERRIDE_PATH=~/repos/moxi_dev/nonros/scheduler/diligent_sdk/scripts
-# END DILIGENT ANSIBLE ROBOT_SPECIFIC MANAGED BLOCK
-export SCH=~/repos/moxi_dev/nonros/scheduler
-export DO_DILIGENT=~/repos/do-diligent
-export DILIGENT_ENVIRONMENT=dev
-alias sr='source devel/setup.bash'
-export MOXI_CALIBRATION_ROOT_PATH=~/repos/.moxi_calibration
-export MOXI_DATA_PATH=~/repos/moxi_dev/diligent_ws/src/moxi_data
-
+#
 ###############################################
 # Personal
 ###############################################
@@ -313,14 +253,6 @@ function swap_alt(){
     setxkbmap -option altwin:swap_alt_win
 }
 
-function rico_bash_prefrences_deploy_rico(){
-    for i in 1 2 4 32
-    do
-        echo "deploying ${i}"
-        sshpass -p S1Machines. scp ~/rico_scripts/rico_bash_preferences.sh moxi@moxi${i}:/home/moxi/rico_tmp/
-    done
-}
-
 function rico_openvpn_off(){
     openvpn3 session-manage --session-path $(openvpn3 sessions-list | grep "Path" | sed 's/Path://g') --disconnect
 }
@@ -351,89 +283,7 @@ function rico_lint_repo_changed_files(){
     fi
 }
 
-###############################################
-# Work Funcs
-###############################################
 
-function sshp(){
-    sshpass -p "S1Machines." ssh -YC $1
-}
+export PATH=/usr/local/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
-function refresh_install(){
-    ${MOXI_DEV}/nonros/scheduler/diligent_sdk/scripts/refresh_install.sh
-}
-
-function feature_flag_deploy_rico(){
-    cd ${DO_DILIGENT}/ansible/ && ansible-playbook playbooks/feature_flags.yml --tags config_files --limit "moxi${1}" -kK --diff --check
-}
-
-function pip_diligent_sdk_rico(){
-    cd $SCH/diligent_sdk/python
-    pip install -e .
-
-}
-
-function global_protect_setup(){
-    sudo cp /etc/resolv.conf /etc/resolv.conf.bak
-    echo "
-nameserver 8.8.8.8
-nameserver 8.8.4.4
-    " | sudo tee /etc/resolv.conf
-}
-
-
-function pritunl_setup(){
-    sudo cp /etc/resolv.conf /etc/resolv.conf.bak
-    echo "
-nameserver 172.18.0.2
-search localdomain
-    " | sudo tee /etc/resolv.conf
-}
-
-function pritunl_cleanup(){
-    sudo cp /etc/resolv.conf.bak /etc/resolv.conf
-}
-
-export AWS_CACHE_DIR=~/.aws/dr/cache
-export AWS_CONFIG_FILE=~/.aws/dr/config
-export AWS_SHARED_CREDENTIALS_FILE=~/.aws/credentials
-export SSO_ROLE_NAME=Developer
-export RCP_USER="$USER"
-# BEGIN ANSIBLE MANAGED BLOCK DEV_SSH_CONFIG
-export DR_BECOME_PASS_ENC=U2FsdGVkX1/Kwv4oTdLed++N2qAR2KT7qTNi87L9rA2/RUGJw27R3IjxTv1+csx006AVXXtRWmM=
-
-ssh() {
-  if echo "$@" | grep -q -P 'moxi\d+|rcp\d+|moxi@'; then
-    /usr/bin/ssh "$@"
-  elif echo "$@" | grep -q -P 'moxi_local|rcp_local'; then
-    printf "\033[0;33mInjecting RCP credential\033[0m\n" >&2
-    sshpass -f ~/.ssh/rcp.credential /usr/bin/ssh "$@"
-  elif echo "$@" | grep -q -P 'pi\d+|rapa\d+|pi@|pi_local|rapa_local'; then
-    printf "\033[0;33mInjecting RAPA credential\033[0m\n" >&2
-    sshpass -f ~/.ssh/rapa.credential /usr/bin/ssh "$@"
-  elif echo "$@" | grep -q -P 'pcdu\d+|rapb\d+|moxi_pcdu@|pcdu_local|rapb_local'; then
-    printf "\033[0;33mInjecting RAPB credential\033[0m\n" >&2
-    sshpass -f ~/.ssh/rapb.credential /usr/bin/ssh "$@"
-  elif echo "$@" | grep -q -P 'gpu\d+|rpg\d+|moxi_gpu@|gpu_local|rgp_local'; then
-    printf "\033[0;33mInjecting RGP credential\033[0m\n" >&2
-    sshpass -f ~/.ssh/rgp.credential /usr/bin/ssh "$@"
-  else
-    /usr/bin/ssh "$@"
-  fi
-}
-
-scp() {
-  if echo "$@" | grep -q -P 'pi\d+|rapa\d+|pi@'; then
-    printf "\033[0;33mInjecting RAPA credential\033[0m\n" >&2
-    sshpass -f ~/.ssh/rapa.credential /usr/bin/scp "$@"
-  elif echo "$@" | grep -q -P 'pcdu\d+|rapb\d+|moxi_pcdu@'; then
-    printf "\033[0;33mInjecting RAPB credential\033[0m\n" >&2
-    sshpass -f ~/.ssh/rapb.credential /usr/bin/scp "$@"
-  elif echo "$@" | grep -q -P 'gpu\d+|rpg\d+|moxi_gpu@'; then
-    printf "\033[0;33mInjecting RGP credential\033[0m\n" >&2
-    sshpass -f ~/.ssh/rgp.credential /usr/bin/scp "$@"
-  else
-    /usr/bin/scp "$@"
-  fi
-}
-# END ANSIBLE MANAGED BLOCK DEV_SSH_CONFIG

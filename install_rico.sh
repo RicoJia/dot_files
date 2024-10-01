@@ -39,18 +39,31 @@ then
 	exit 1
 fi
 
+CURRENT_DIR=$(pwd)
+# assuming the user who logged in is the user
+USER=$(logname)
+
 install_barebone(){
-	mv vimrc ~/.vimrc
-	mv bashrc ~/.bashrc
-	sudo apt-get update
-	sudo apt-get upgrade
+	echo ${CURRENT_DIR}/vimrc
+	cp ${CURRENT_DIR}/vimrc /home/${USER}/.vimrc
+	cp ${CURRENT_DIR}/bashrc /home/${USER}/.bashrc
+    INPUT_RC=""
+# TODO
+	#sudo apt-get update
+	#sudo apt-get upgrade
+    # install vim plug
+    curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+    # this is for clipboard
+	sudo apt-get install -y vim-gtk
 }
 
 install_terminator(){
 	sudo apt-get install -y terminator
 }
 
-install_vim(){
+install_vim_optional_stuff(){
 
 	apt install node
 	apt install npm
@@ -74,7 +87,6 @@ install_office(){
 
 install_clang(){
 	sudo apt install clang
-	sudo apt-get install -y vim-gtk
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
 
 	sudo apt install cmake
@@ -89,7 +101,7 @@ install_vscode(){
 # Commands
 install_barebone
 #install_terminator
-#install_vim
+#install_vim_optional_stuff
 
 
 
