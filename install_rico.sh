@@ -84,7 +84,13 @@ install_barebone(){
 }
 
 install_terminator(){
-	sudo apt-get install -y terminator
+	# sudo apt-get install -y terminator
+    TERMINATOR_CONFIG_DIR=/home/${USER}/.config/terminator/
+    if [[ ! -d ${TERMINATOR_CONFIG_DIR} ]]; then 
+        mkdir ${TERMINATOR_CONFIG_DIR}
+    fi
+    cp ${CURRENT_DIR}/terminator_config ${TERMINATOR_CONFIG_DIR}/config
+
 }
 
 install_vim_optional_stuff(){
@@ -124,7 +130,7 @@ install_vscode(){
 
 # Commands
 install_barebone
-#install_terminator
+install_terminator
 #install_vim_optional_stuff
 
 
