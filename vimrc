@@ -127,10 +127,10 @@ set mouse=a
 " Toggle clipboard
 set clipboard=unnamedplus
 " if |$mouse == 'a' 
-if !empty($SSH_CLIENT) 
-	set mouse=
-	echom 'mouse click disabled for SSH Session'
-endif
+" if !empty($SSH_CLIENT) 
+" 	set mouse=
+" 	echom 'mouse click disabled for SSH Session'
+" endif
 
 " yank file name
 nnoremap <C-y> :let @+=expand('%:')<CR>

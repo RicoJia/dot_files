@@ -161,8 +161,8 @@ wifi_orin_connect(){
 # source ~/file_exchange_port/Fun_Projects/Junior_Project/junior_ws/devel/setup.bash
 
 function cp_rcs(){
-    cp /home/${USER}/.bashrc /home/${USER}/file_exchange_port/Books_Dotfiles/dot_files/bashrc
-    cp /home/${USER}/.vimrc /home/${USER}/file_exchange_port/Books_Dotfiles/dot_files/vimrc
+    cp /home/${USER}/.bashrc /home/${USER}/dot_files/bashrc
+    cp /home/${USER}/.vimrc /home/${USER}/dot_files/vimrc
 }
 
 function restart_sound_rico(){
