@@ -135,6 +135,25 @@ alias pdfstudio2022='~/pdfstudio2022/pdfstudio2022'
 function gsub_update_rico(){
 	git submodule update --init --recursive
 }
+
+###############################################
+# Orin
+###############################################
+
+
+wifi_orin_connect(){
+    # if you see wpa issues, do wpa_passphrase <SSID> <PASSWORD> | sudo tee /etc/wpa_supplicant.conf
+    set -ex
+
+    sudo rfkill unblock wifi
+    sudo ip link set wlan0 up
+    sudo wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
+    echo "this might take a while"
+    echo "prepend domain-name-servers 8.8.8.8 1.1.1.1;" | sudo tee -a /etc/dhcp/dhclient.conf
+    sudo dhclient wlan0
+}
+
+
 #
 ###############################################
 # Personal
@@ -286,4 +305,4 @@ function rico_lint_repo_changed_files(){
 
 export PATH=/usr/local/cuda/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
-
+export PATH=$PATH:/home/rico/.local/bin
