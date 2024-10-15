@@ -146,6 +146,9 @@ wifi_orin_connect(){
     set -ex
 
     sudo rfkill unblock wifi
+    # temproarily assigns a static ip. Will be gone after reboo
+    sudo ip addr add 192.168.1.188/24 dev wlan0
+
     sudo ip link set wlan0 up
     sudo wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
     echo "this might take a while"
