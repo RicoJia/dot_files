@@ -77,7 +77,6 @@ Plug 'vim-airline/vim-airline-themes'
 
 
 call plug#end()
-"
 
 "-----------------------------------------General
 set nocompatible              " be iMproved, required
@@ -89,8 +88,9 @@ filetype plugin indent on    " required
 if executable("ag")
     set grepprg=ag\ --nogroup\ --nocolor\ --column
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
-	let g:ctrlp_use_caching=0
+    let g:ctrlp_use_caching=0
 endif
+
 " Editing
 set backspace=indent,eol,start	
 set autoread
@@ -247,6 +247,10 @@ xnoremap <expr> <F4> mode() ==# "v"? "di****<Esc>hP/*<CR>na" : "di**<CR>**<Esc>k
 " vnoremap <F4> c**<Esc>pa**
 nnoremap <f4> i****<esc>hi
 inoremap <F4> ****<Esc>hi
+" xnoremap <expr> <F5> mode() ==# "v"? "di`<Esc>pa`<Esc>a" : "c`<CR>`<Esc>mzkp'[kA"
+vnoremap <F5> c`<C-r>"`<Esc>
+nnoremap <F5> i``<Esc>hhi
+inoremap <F5> ``<Esc>hhi
 " insert at end of everyline in visual mode
 vnoremap A :s/$//<Left>
 
@@ -386,7 +390,7 @@ map <C-Right> <C-w>l
 
 nnoremap <PageUp><PageUp> :bp<CR>
 nnoremap <PageDown><PageDown> :bn<CR>
-  
+
 " resize window
 nnoremap - <C-W><lt>
 nnoremap + <C-W>>
@@ -420,7 +424,7 @@ inoremap <expr> <C-n> pumvisible() ? '<C-n>' :
 
 inoremap <expr> <M-,> pumvisible() ? '<C-n>' :
   \ '<C-x><C-o><C-n><C-p><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
-  
+
 " Navigate the complete menu items like CTRL+n / CTRL+p would.
 " inoremap <expr> <Down> pumvisible() ? "<C-n>" :"<Down>"
 " inoremap <expr> <Up> pumvisible() ? "<C-p>" : "<Up>"
@@ -624,6 +628,8 @@ augroup filetypedetect
     " associate *.foo with php filetype
 augroup END
 
+" let g:coc_global_extensions = ['coc-pyright', 'coc-clangd']
+"
 "--------------------------------------- ctags
 " go from the current directory up to the nearest tags file
 set tags=tags;/
