@@ -303,6 +303,12 @@ function rico_lint_repo_changed_files(){
         echo "Linted .py files: ${PYTHON_FILES_TO_LINT}"
     else echo "Python linting: No files to lint"
     fi
+    MARKDOWN_FILES_TO_LINT=$(git status --porcelain | awk '/^[^D]/ {print $2}' | grep -E "*.md")
+    echo ${MARKDOWN_FILES_TO_LINT} | xargs markdownlint -q -f
+    echo "Linted Markdown files: ${MARKDOWN_FILES_TO_LINT}"
+    MARKDOWN_FILES_TO_LINT=$(git status --porcelain | awk '/^[^D]/ {print $2}' | grep -E "*.markdown")
+    echo ${MARKDOWN_FILES_TO_LINT} | xargs markdownlint -q -f
+    echo "Linted Markdown files: ${MARKDOWN_FILES_TO_LINT}"
 }
 
 
