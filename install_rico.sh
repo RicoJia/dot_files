@@ -51,7 +51,15 @@ install_barebone(){
 
 	sudo apt-get update
 	sudo apt-get upgrade
+    # ssh
+    sudo apt install openssh-server
+
+    # install vim
+    sudo add-apt-repository ppa:jonathonf/vim
+    sudo apt update
+    sudo apt install vim
     # install vim plug
+    sudo apt install curl
     curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
@@ -95,14 +103,15 @@ install_terminator(){
 
 install_vim_optional_stuff(){
 
-	apt install node
-	apt install npm
+	sudo apt install node
+    sudo apt install npm
 	# vim-instant-markdown
 	npm -g install instant-markdown-d
 	pip3 install --user smdv
 	curl -LO https://github.com/BurntSushi/ripgrep/releases/download/12.1.1/ripgrep_12.1.1_amd64.deb
 	dpkg -i ripgrep_12.1.1_amd64.deb
 	rm -rf ripgrep*
+    sudo npm install -g instant-markdown-d
 
 	# Upgrade vim to vim8.2 (if you see stuff with coc vim, and vim fugitive, uninstall them, then reinstall, PlugClean and PluginClean)
 
@@ -126,13 +135,14 @@ install_clang(){
 install_vscode(){
 	# TODO
 	pip3 install pytest-vscodedebug
+
 }
 
 # Commands
-install_barebone
-install_terminator
-#install_vim_optional_stuff
-
-
+# install_barebone
+# install_terminator
+# install_vim_optional_stuff
+install_clang
+install_vscode
 
 
