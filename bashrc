@@ -315,3 +315,13 @@ function rico_lint_repo_changed_files(){
 export PATH=/usr/local/cuda/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 export PATH=$PATH:/home/rico/.local/bin
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+export ROS_MASTER_URI=http://localhost:11311
+export ROS_HOSTNAME=$(hostname)
+
+source /opt/ros/iron/setup.bash
+
