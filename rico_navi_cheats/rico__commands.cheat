@@ -1,0 +1,18 @@
+% tar
+
+# Extract a .tar.gz archive
+tar xvzf <archive_tar_gz>
+
+# Extract a .tar.gz archive to a specific directory
+tar xvzf <archive_tar_gz> -C <destination_path>
+
+% docker
+
+# List all Docker containers (name │ status │ ID)
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.ID}}"
+
+# reviving all stopped containers
+docker start $(docker ps -a -f status=exited -q)
+
+# Bring down all containers in all profiles
+docker compose --profile "*" down

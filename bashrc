@@ -283,32 +283,47 @@ function rico_openvpn_on(){
     openvpn3 session-start --config ~/file_exchange_port/vpn_related/profile-4.ovpn
 }
 
+
 # This function can go to the root of the git repo
 # And filter for multiple file extensions.
 # among new files / changed files
 function rico_lint_repo_changed_files(){
     cd $(git rev-parse --show-toplevel)
-    CPP_FILES_TO_LINT=$(git status --porcelain | awk '/^[^D]/ {print $2}' | grep -E "\.(cpp|h|hpp)") 
-    echo ${CPP_FILES_TO_LINT} | xargs clang-format -i
-    echo "Linted cpp files: ${CPP_FILES_TO_LINT}"
+    files=$(git status --porcelain | awk '/^[^D]/ {print $2}')
 
-    CMAKELISTS_TO_LINT=$(git status --porcelain | awk '/^[^D]/ {print $2}' | grep -E "CMakeLists.txt")
-    echo ${CMAKELISTS_TO_LINT} | xargs cmake-format -i
-    echo "Linted CMakeLists.txt files: ${CMAKELISTS_TO_LINT}"
+    CPP_FILES_TO_LINT=$(echo ${files} | grep -E "\.(cpp|hpp|h)$")
+    if [[ -n $CPP_FILES_TO_LINT ]]; then
+        echo ${CPP_FILES_TO_LINT} | xargs clang-format -i
+        echo "Linted cpp files: ${CPP_FILES_TO_LINT}"
+    else
+        echo "C++ linting: No files to lint"
+    fi
 
-    PYTHON_FILES_TO_LINT=$(git status --porcelain | awk '/^[^D]/ {print $2}' | grep -E "*.py")
-    if [[ ${#PYTHON_FILES_TO_LINT} != 0 ]]; then
+    CMAKELISTS_TO_LINT=$(echo ${files} | grep -E "CMakeLists\.txt$")
+    if [[ -n $CMAKELISTS_TO_LINT ]]; then
+        echo "$CMAKELISTS_TO_LINT" | xargs cmake-format -i
+        echo "Linted CMakeLists.txt: $CMAKELISTS_TO_LINT"
+    else
+        echo "CMakeLists linting: no files to process"
+    fi
+
+
+    PYTHON_FILES_TO_LINT=$(echo "$files" | grep -E '\.py$')
+    if [[ -n $PYTHON_FILES_TO_LINT ]]; then
         echo ${PYTHON_FILES_TO_LINT} | xargs black
         echo ${PYTHON_FILES_TO_LINT} | xargs isort
         echo "Linted .py files: ${PYTHON_FILES_TO_LINT}"
-    else echo "Python linting: No files to lint"
+    else
+        echo "Python linting: No files to lint"
     fi
-    MARKDOWN_FILES_TO_LINT=$(git status --porcelain | awk '/^[^D]/ {print $2}' | grep -E "*.md")
-    echo ${MARKDOWN_FILES_TO_LINT} | xargs markdownlint -q -f
-    echo "Linted Markdown files: ${MARKDOWN_FILES_TO_LINT}"
-    MARKDOWN_FILES_TO_LINT=$(git status --porcelain | awk '/^[^D]/ {print $2}' | grep -E "*.markdown")
-    echo ${MARKDOWN_FILES_TO_LINT} | xargs markdownlint -q -f
-    echo "Linted Markdown files: ${MARKDOWN_FILES_TO_LINT}"
+
+    MARKDOWN_FILES_TO_LINT=$(echo "$files" | grep -E '\.(md|markdown)$')
+    if [[ -n $MARKDOWN_FILES_TO_LINT ]] ; then
+        echo ${MARKDOWN_FILES_TO_LINT} | xargs markdownlint -q -f
+        echo "Linted Markdown files: ${MARKDOWN_FILES_TO_LINT}"
+    else
+        echo "Markdown linting: No files to lint"
+    fi
 }
 
 
@@ -325,3 +340,4 @@ export ROS_HOSTNAME=$(hostname)
 
 source /opt/ros/iron/setup.bash
 
+bind -x '"\C-f": navi'
