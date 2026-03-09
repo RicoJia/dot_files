@@ -1,7 +1,11 @@
 # ~/.bashrc: executed by bash(1) for non-login shells.
-# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
-# for examples
 
+#######################################################
+# A bunch of defs
+#######################################################
+
+NAUTICUS_DIR=/home/rjia/ocr_snips/Work/nauticus
+RICO_TEST_DIR=/home/rjia/volume/rico_random_stuff/random_scripts/rico_testing
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
@@ -283,7 +287,6 @@ function rico_openvpn_on(){
     openvpn3 session-start --config ~/file_exchange_port/vpn_related/profile-4.ovpn
 }
 
-
 # This function can go to the root of the git repo
 # And filter for multiple file extensions.
 # among new files / changed files
@@ -313,7 +316,7 @@ function rico_lint_repo_changed_files(){
         echo ${PYTHON_FILES_TO_LINT} | xargs black
         echo ${PYTHON_FILES_TO_LINT} | xargs isort
         echo "Linted .py files: ${PYTHON_FILES_TO_LINT}"
-    else
+    else 
         echo "Python linting: No files to lint"
     fi
 
@@ -321,7 +324,7 @@ function rico_lint_repo_changed_files(){
     if [[ -n $MARKDOWN_FILES_TO_LINT ]] ; then
         echo ${MARKDOWN_FILES_TO_LINT} | xargs markdownlint -q -f
         echo "Linted Markdown files: ${MARKDOWN_FILES_TO_LINT}"
-    else
+    else 
         echo "Markdown linting: No files to lint"
     fi
 }
@@ -338,6 +341,282 @@ export NVM_DIR="$HOME/.nvm"
 export ROS_MASTER_URI=http://localhost:11311
 export ROS_HOSTNAME=$(hostname)
 
-source /opt/ros/iron/setup.bash
+# source /opt/ros/iron/setup.bash
 
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+export PATH="$HOME/.local/bin:$PATH"
+
+function vpn(){
+    local LOG_FILE="/tmp/openvpn_$(date +%Y%m%d_%H%M%S).log"
+
+    echo "Starting VPN (daemon mode with output)..."
+    echo "Log file: $LOG_FILE"
+    echo ""
+
+    # Start OpenVPN in daemon mode with log file
+    sudo openvpn --config ${HOME}/openvpn/profile-1198.ovpn --daemon --log "$LOG_FILE"
+
+    echo "VPN started. Tailing log file..."
+    echo "Press Ctrl+C to stop viewing (VPN will keep running)"
+    echo ""
+
+    # Wait a moment for log file to be created
+    sleep 2
+
+    # Tail the log file (needs sudo since OpenVPN creates it as root)
+    sudo tail -f "$LOG_FILE"
+}
+
+function vpn_off(){
+    sudo killall openvpn
+}
+
+function dps(){
+    docker ps -a
+}
+
+dps(){
+   # shows container name, image, status
+   docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | (read -r header; echo "$header"; sort -f -k1)
+}
+
+# Base directory where mounts are created (change if you prefer)
+AUGAM_DIR="${AUGAM_DIR:-$HOME/augam_dir}"
+
+
+mount_augam() {
+  # usage: mount_augam [remote]
+  local remote mountpoint choice
+  local -a remotes
+
+  # ensure rclone exists
+  if ! command -v rclone >/dev/null 2>&1; then
+    echo "rclone not found. Install rclone first." >&2
+    return 2
+  fi
+
+  echo "Running 'augam list' to let you authenticate (if required)..."
+  augam list >/dev/null 2>&1 || true
+
+  # If user provided an argument, use it
+  if [ $# -ge 1 ] && [ -n "$1" ]; then
+    remote="$1"
+  else
+    # Build list of existing rclone remotes (strip trailing ':')
+    mapfile -t remotes < <(rclone listremotes 2>/dev/null | sed 's/:$//' | sort)
+
+    if [ "${#remotes[@]}" -gt 0 ]; then
+      echo "Available rclone remotes:"
+      local i=1
+      for r in "${remotes[@]}"; do
+        printf "  %2d) %s\n" "$i" "$r"
+        ((i++))
+      done
+      echo
+      read -rp "Select remote by number, or type a new remote name: " choice
+
+      if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#remotes[@]}" ]; then
+        remote="${remotes[$((choice-1))]}"
+      else
+        remote="$choice"
+      fi
+    else
+      read -rp "Type the remote name to mount (example: 2025-gom): " remote
+    fi
+  fi
+
+  if [ -z "$remote" ]; then
+    echo "No remote provided; aborting." >&2
+    return 1
+  fi
+
+    if ! augam create --alias "$remote" --rclone "$remote"; then
+      echo "❌ Failed to create augam remote '${remote}'. Please verify the name and try again." >&2
+      return 2
+    fi
+
+  : "${AUGAM_DIR:?AUGAM_DIR is not set}"
+  mountpoint="$AUGAM_DIR/$remote"
+  mkdir -p "$mountpoint"
+
+  if command -v mountpoint >/dev/null 2>&1 && mountpoint -q "$mountpoint"; then
+    echo "Already mounted: $mountpoint"
+    return 0
+  fi
+
+  rclone mount "${remote}:" "$mountpoint" --daemon
+  # echo "Mounted ${remote}: -> $mountpoint (background)..."
+}
+
+unmount_augam() {
+  # usage: unmount_augam [remote|/path/to/mountpoint]
+  local remote mountpoint ans choice
+  local augam_real pwd_real
+  local -a candidates
+
+  : "${AUGAM_DIR:?AUGAM_DIR is not set}"
+
+  augam_real="$(cd "$AUGAM_DIR" 2>/dev/null && pwd -P)" || {
+    echo "AUGAM_DIR does not exist or is not accessible: $AUGAM_DIR" >&2
+    return 2
+  }
+  pwd_real="$(pwd -P)"
+
+  # If user provided an arg: allow either a remote name OR an explicit path
+  if [ $# -ge 1 ] && [ -n "$1" ]; then
+    if [[ "$1" == */* ]]; then
+      mountpoint="$(cd "$1" 2>/dev/null && pwd -P)" || mountpoint="$1"
+      remote="$(basename "$mountpoint")"
+    else
+      remote="$1"
+      mountpoint="$AUGAM_DIR/$remote"
+    fi
+  else
+    # Build candidate list: subdirs of AUGAM_DIR + subdirs of current dir (if different)
+    while IFS= read -r p; do candidates+=("$p"); done < <(
+      find "$augam_real" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort
+    )
+
+    if [ "$pwd_real" != "$augam_real" ]; then
+      while IFS= read -r p; do
+        # avoid duplicates
+        local dup=0
+        for existing in "${candidates[@]}"; do
+          [[ "$existing" == "$p" ]] && { dup=1; break; }
+        done
+        [ $dup -eq 0 ] && candidates+=("$p")
+      done < <(find "$pwd_real" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
+    fi
+
+    if [ "${#candidates[@]}" -gt 0 ]; then
+      echo "Select a mountpoint to unmount:"
+      local i=1
+      for p in "${candidates[@]}"; do
+        if [[ "$p" == "$augam_real/"* ]]; then
+          printf "  %2d) %s  (AUGAM_DIR)\n" "$i" "$(basename "$p")"
+        else
+          printf "  %2d) %s  (cwd)\n" "$i" "$(basename "$p")"
+        fi
+        ((i++))
+      done
+      echo
+      read -rp "Enter number, or type remote name/path: " choice
+
+      if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#candidates[@]}" ]; then
+        mountpoint="${candidates[$((choice-1))]}"
+        remote="$(basename "$mountpoint")"
+      else
+        if [[ "$choice" == */* ]]; then
+          mountpoint="$(cd "$choice" 2>/dev/null && pwd -P)" || mountpoint="$choice"
+          remote="$(basename "$mountpoint")"
+        else
+          remote="$choice"
+          mountpoint="$AUGAM_DIR/$remote"
+        fi
+      fi
+    else
+      read -rp "Type the remote name to unmount (example: 2025-gom): " remote
+      mountpoint="$AUGAM_DIR/$remote"
+    fi
+  fi
+
+  if [ -z "$remote" ] || [ -z "$mountpoint" ]; then
+    echo "No remote/mountpoint provided; aborting." >&2
+    return 1
+  fi
+
+  if [ ! -d "$mountpoint" ]; then
+    echo "Mount directory does not exist: $mountpoint" >&2
+    return 2
+  fi
+
+  # prevent unmounting from inside the mountpoint
+  local mp_real
+  mp_real="$(cd "$mountpoint" 2>/dev/null && pwd -P)" || mp_real="$mountpoint"
+  if [ "$pwd_real" = "$mp_real" ] || [[ "$pwd_real" == "$mp_real/"* ]]; then
+    echo "You are currently inside $mp_real. Please cd out before unmounting."
+    return 4
+  fi
+
+  if command -v mountpoint >/dev/null 2>&1 && mountpoint -q "$mountpoint"; then
+    echo "Unmounting $mountpoint..."
+    if command -v fusermount >/dev/null 2>&1; then
+      fusermount -u "$mountpoint" || {
+        echo "fusermount failed, trying umount..."
+        umount "$mountpoint" || {
+          echo "umount failed, trying lazy unmount..."
+          fusermount -uz "$mountpoint" || { echo "lazy unmount failed"; return 3; }
+        }
+      }
+    else
+      umount "$mountpoint" || {
+        echo "umount failed, trying lazy unmount..."
+        fusermount -uz "$mountpoint" || { echo "lazy unmount failed"; return 3; }
+      }
+    fi
+    sleep 0.5
+  else
+    echo "Not mounted: $mountpoint"
+  fi
+
+  read -rp "Remove mountpoint directory $mountpoint? [y/N] " ans
+  case "$ans" in
+    [yY]|[yY][eE][sS])
+      rm -rf "$mountpoint"
+      echo "Removed $mountpoint"
+      ;;
+    *)
+      echo "Left $mountpoint in place."
+      ;;
+  esac
+
+  return 0
+}
+
+update_everything(){
+    local errors=0
+
+    # --- 1. rico_toolkitt_bashrc.sh -> Work repo ---
+    local work_dir="$HOME/file_exchange_port/Work"
+    local bashrc_dest="$work_dir/nauticus/rico_toolkitt_bashrc.sh"
+    cp /home/rjia/volume/rico_toolkitt_bashrc.sh "$bashrc_dest" || { echo "ERROR: copy to Work failed"; ((errors++)); }
+    (
+        cd "$work_dir"
+        git add "$bashrc_dest"
+        git commit -m "autoupdate" || true   # no-op if nothing changed
+        git push origin master
+    ) || { echo "ERROR: Work repo push failed"; ((errors++)); }
+
+    # --- 2. ~/.bashrc -> dot_files repo ---
+    local dotfiles_dir="$HOME/file_exchange_port/dot_files"
+    cp "$HOME/.bashrc" "$dotfiles_dir/bashrc" || { echo "ERROR: copy to dot_files failed"; ((errors++)); }
+    (
+        cd "$dotfiles_dir"
+        git add bashrc
+        git commit -m "autoupdate" || true   # no-op if nothing changed
+        git push origin main
+    ) || { echo "ERROR: dot_files repo push failed"; ((errors++)); }
+
+    if ((errors == 0)); then
+        echo "update_everything: all done."
+    else
+        echo "update_everything: finished with $errors error(s)."
+        return 1
+    fi
+}
+
+
+alias vehicle_container_live_debug='docker exec -it -e ROS_DOMAIN_ID=11 vehicle_container bash'
+
+# Binding navi
 bind -x '"\C-f": navi'
+export PATH="$HOME/.npm-global/bin:$PATH"
+
+export SLACK_BOT_TOKEN=REDACTED
+export SLACK_APP_TOKEN=REDACTED
+
+# OpenClaw Completion
+source "/home/rjia/.openclaw/completions/openclaw.bash"
+
+
