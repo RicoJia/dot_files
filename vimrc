@@ -1,3 +1,4 @@
+" sudo apt install vim-gtk3
 set compatible
 
 syntax on
@@ -145,6 +146,16 @@ colorscheme PaperColor
 set cursorline 
 " highlight line color, see here https://jonasjacek.github.io/colors/
 hi CursorLine   cterm=NONE ctermbg=52 ctermfg=NONE
+" enable cursor coloring
+if has('termguicolors')
+  set termguicolors
+endif
+
+colorscheme PaperColor
+
+" now override the number columns
+highlight LineNr        guifg=#ffb6c1 ctermfg=LightMagenta guibg=NONE
+highlight CursorLineNr  guifg=#e75480 ctermfg=Magenta        guibg=NONE gui=bold
 
 " change directory automatically
 set autochdir
@@ -638,6 +649,7 @@ nnoremap <C-a> <C-t>
 
 " --------------------------------------- macros
 " the image one 
-let @i='`f(ldi(ffO<img	€ýab`f"lci"€ýaciw€ýaa"€ýapa€ýaa"€ýawwwlci"400€ýa' 
+" let @i='`f(ldi(ffO<img	€ýab`f"lci"€ýaciw€ýaa"€ýapa€ýaa"€ýawwwlci"400€ýa' 
+let @i = "yiWciW<img src=\"\<C-r>0\" width=\"400\" alt=\"\"/>\<Esc>"
 let @p ='pww€krãyy'
 set nomodeline    " Maybe an error pops up saying error processing mode line

@@ -168,8 +168,8 @@ wifi_orin_connect(){
 # source ~/file_exchange_port/Fun_Projects/Junior_Project/junior_ws/devel/setup.bash
 
 function cp_rcs(){
-    cp /home/${USER}/.bashrc /home/${USER}/dot_files/bashrc
-    cp /home/${USER}/.vimrc /home/${USER}/dot_files/vimrc
+    cp /home/${USER}/.bashrc /home/${USER}/file_exchange_port/dot_files/bashrc
+    cp /home/${USER}/.vimrc /home/${USER}/file_exchange_port/dot_files/vimrc
 }
 
 function restart_sound_rico(){
@@ -356,6 +356,23 @@ function vpn(){
 
     # Start OpenVPN in daemon mode with log file
     sudo openvpn --config ${HOME}/openvpn/profile-1198.ovpn --daemon --log "$LOG_FILE"
+
+    # VPN routing changes can remove Docker bridge gateway IPs — restore them
+    echo "Waiting for VPN routes to settle..."
+    sleep 3
+    echo "Restoring Docker bridge gateway IPs..."
+    docker network ls --filter driver=bridge -q | while read -r nid; do
+        local gw prefix br
+        gw=$(docker network inspect "$nid" --format '{{range .IPAM.Config}}{{.Gateway}}{{end}}' 2>/dev/null)
+        prefix=$(docker network inspect "$nid" --format '{{range .IPAM.Config}}{{.Subnet}}{{end}}' 2>/dev/null | grep -oP '/\d+$')
+        br="br-${nid}"
+        [ -z "$gw" ] || [ -z "$prefix" ] && continue
+        ip link show "$br" &>/dev/null || continue
+        ip addr show "$br" | grep -q "$gw" && continue
+        sudo ip addr add "${gw}${prefix}" dev "$br" 2>/dev/null \
+            && echo "  Restored ${gw}${prefix} on $br" \
+            || echo "  Failed to restore ${gw}${prefix} on $br"
+    done
 
     echo "VPN started. Tailing log file..."
     echo "Press Ctrl+C to stop viewing (VPN will keep running)"
@@ -612,9 +629,6 @@ alias vehicle_container_live_debug='docker exec -it -e ROS_DOMAIN_ID=11 vehicle_
 # Binding navi
 bind -x '"\C-f": navi'
 export PATH="$HOME/.npm-global/bin:$PATH"
-
-export SLACK_BOT_TOKEN=REDACTED
-export SLACK_APP_TOKEN=REDACTED
 
 # OpenClaw Completion
 source "/home/rjia/.openclaw/completions/openclaw.bash"
