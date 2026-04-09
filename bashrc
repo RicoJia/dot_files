@@ -389,8 +389,8 @@ function vpn_off(){
     sudo killall openvpn
 }
 
-function dps(){
-    docker ps -a
+dis(){
+    docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.CreatedAt}}\t{{.Size}}"
 }
 
 dps(){
