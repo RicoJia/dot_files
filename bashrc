@@ -634,3 +634,15 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 source "/home/rjia/.openclaw/completions/openclaw.bash"
 
 
+# ────────────────────────────────────────────────────────────────────────────
+# PS1 is the environment variable that defines your primary prompt string—i.e. what you see every time the shell is ready to accept a command.
+parse_git_branch() {
+  if [ -n "$(git rev-parse --git-dir 2>/dev/null)" ]; then
+      echo "($(git rev-parse --abbrev-ref HEAD))"
+  fi
+}
+ORIG_PS1="$PS1"
+# Note: single-quoting around the $(…) means "run it at _each_ prompt,"
+# and wrapping \e[…] in \[…\] tells Bash those are zero-width.
+export PS1="$ORIG_PS1"'\[\e[0;36m\]$(parse_git_branch)\[\e[0m\] '
+# ────────────────────────────────────────────────────────────────────────────
