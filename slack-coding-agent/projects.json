@@ -1,0 +1,13 @@
+{
+  "global_dir": "/home/ricojia/file_exchange_port",
+  "projects": {
+    "halo": {
+      "name": "halo",
+      "host_dir": "/home/ricojia/file_exchange_port/halo"
+    },
+    "dot_files": {
+      "name": "dot_files",
+      "host_dir": "/home/ricojia/file_exchange_port/dot_files"
+    }
+  }
+}
