@@ -1,9 +1,12 @@
-{
+
   "global_dir": "/home/ricojia/file_exchange_port",
   "projects": {
     "halo": {
       "name": "halo",
-      "host_dir": "/home/ricojia/file_exchange_port/halo"
+      "host_dir": "/home/ricojia/file_exchange_port/halo",
+      "container": "halo_runtime_container",
+      "container_dir": "/home/halo_runtime",
+      "in_container_ws_dir": "/home/halo_runtime"
     },
     "dot_files": {
       "name": "dot_files",

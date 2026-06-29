@@ -73,7 +73,7 @@ SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
 SLACK_APP_TOKEN = os.environ["SLACK_APP_TOKEN"]
 
 BASE_DIR = Path(__file__).resolve().parent
-PROJECTS_JSON = Path(os.environ.get("PROJECTS_JSON", BASE_DIR / "projects.json")).expanduser()
+PROJECTS_JSON = Path(os.environ.get("PROJECTS_JSON", "~/.claude/projects.json")).expanduser()
 DB_PATH = Path(os.environ.get("STATE_DB", BASE_DIR / "thread_state.db"))
 
 ALLOWED_USER_IDS = {
@@ -113,6 +113,7 @@ class Project:
     host_dir: Path
     container: str | None
     container_dir: str | None
+    in_container_ws_dir: str | None
 
 
 # ---------------------------------------------------------------------------
@@ -205,6 +206,7 @@ def load_projects() -> dict[str, Project]:
             host_dir=host_dir,
             container=cfg.get("container"),
             container_dir=cfg.get("container_dir"),
+            in_container_ws_dir=cfg.get("in_container_ws_dir"),
         )
 
     return projects
@@ -222,8 +224,8 @@ def validate_project(project_key: str) -> Project:
     if not project.host_dir.is_dir():
         raise ValueError(f"Project host_dir does not exist: {project.host_dir}")
 
-    if project.container and not project.container_dir:
-        raise ValueError(f"Project `{project_key}` has a container but no container_dir")
+    if project.container and not project.in_container_ws_dir:
+        raise ValueError(f"Project `{project_key}` has a container but no in_container_ws_dir")
 
     return project
 
@@ -362,7 +364,7 @@ def parse_claude_output(stdout: str) -> str:
 
 
 def build_claude_args(prompt: str, session_id: str, started: bool) -> list[str]:
-    args = ["claude", "-p", "--output-format", "json"]
+    args = ["claude", "-p", "--output-format", "json", "--permission-mode", "bypassPermissions"]
 
     if started:
         args += ["--resume", session_id]
@@ -377,16 +379,23 @@ def run_claude(project: Project, prompt: str, session_id: str, started: bool) ->
     claude_args = build_claude_args(prompt, session_id, started)
 
     if project.container:
-        assert project.container_dir is not None
+        assert project.in_container_ws_dir is not None, \
+            f"Project {project.key!r} has a container but no in_container_ws_dir"
 
+        # in_container_ws_dir is the working dir and HOME inside the container.
         # Use shlex.join so Slack text is safely quoted inside bash -lc.
-        shell_command = shlex.join(claude_args)
+        container_home = project.in_container_ws_dir
+        shell_command = (
+            f"export HOME={container_home}; "
+            "export PATH=\"$HOME/.local/bin:$PATH\"; "
+            + shlex.join(claude_args)
+        )
 
         cmd = [
             "docker",
             "exec",
             "-w",
-            project.container_dir,
+            container_home,
             project.container,
             "bash",
             "-lc",
