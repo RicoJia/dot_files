@@ -60,10 +60,19 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
+# Show the current Git branch, or the short commit when HEAD is detached.
+__rico_git_branch_prompt() {
+    local branch
+    branch=$(command git symbolic-ref --quiet --short HEAD 2>/dev/null) ||
+        branch=$(command git rev-parse --short HEAD 2>/dev/null) || return 0
+    branch=${branch//[[:cntrl:]]/?}
+    printf ' (%s)' "$branch"
+}
+
 if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[1;35m\]$(__rico_git_branch_prompt)\[\033[00m\]\$ '
 else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w$(__rico_git_branch_prompt)\$ '
 fi
 unset color_prompt force_color_prompt
 
@@ -355,7 +364,7 @@ function vpn(){
     echo ""
 
     # Start OpenVPN in daemon mode with log file
-    sudo openvpn --config ${HOME}/openvpn/profile-1198.ovpn --daemon --log "$LOG_FILE"
+    sudo openvpn --config ${HOME}/openvpn/profile-1245.ovpn --daemon --log "$LOG_FILE"
 
     # VPN routing changes can remove Docker bridge gateway IPs — restore them
     echo "Waiting for VPN routes to settle..."
@@ -623,6 +632,10 @@ update_everything(){
     fi
 }
 
+usb_mount_read_only(){
+    sudo mkdir -p /mnt/recovery
+    sudo mount -t ntfs3 -o ro,force /dev/sda1 /mnt/recovery
+}
 
 alias vehicle_container_live_debug='docker exec -it -e ROS_DOMAIN_ID=11 vehicle_container bash'
 
@@ -633,16 +646,32 @@ export PATH="$HOME/.npm-global/bin:$PATH"
 # OpenClaw Completion
 source "/home/rjia/.openclaw/completions/openclaw.bash"
 
-
-# ────────────────────────────────────────────────────────────────────────────
-# PS1 is the environment variable that defines your primary prompt string—i.e. what you see every time the shell is ready to accept a command.
-parse_git_branch() {
-  if [ -n "$(git rev-parse --git-dir 2>/dev/null)" ]; then
-      echo "($(git rev-parse --abbrev-ref HEAD))"
-  fi
+mount_aquanaut_xps(){
+mkdir -p ~/remote-mounts/aquanaut-XPS-8940
+sshfs aquanaut@aquanaut-XPS-8940:/ ~/remote-mounts/aquanaut-XPS-8940 \
+    -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3
 }
-ORIG_PS1="$PS1"
-# Note: single-quoting around the $(…) means "run it at _each_ prompt,"
-# and wrapping \e[…] in \[…\] tells Bash those are zero-width.
-export PS1="$ORIG_PS1"'\[\e[0;36m\]$(parse_git_branch)\[\e[0m\] '
-# ────────────────────────────────────────────────────────────────────────────
+
+claude_resume(){
+    ~/.local/bin/claude --resume --dangerously-skip-permissions
+}
+
+claude_new(){
+    claude --dangerously-skip-permissions
+}
+
+codex_resume(){
+    codex  -c reasoning_effort=medium  --dangerously-bypass-approvals-and-sandbox
+}
+
+code_new(){
+    codex  reasoning_effort=medium  --dangerously-bypass-approvals-and-sandbox
+}
+
+gdiff(){
+    git diff $@
+}
+
+gstatus(){
+    git status
+}
