@@ -8,6 +8,7 @@ description: Explain an algorithm, pipeline or system as a numbered story in exe
 ## Structure
 1. Number the steps in the order the system runs them, from input to output. Don't group by topic.
 2. Each step gives what happens, why it is needed, and what it produces for the next step.
+    - If the reason is not obvious, place the reason with the step. For example, the user could ask "why is there slope?". Then, answer it right there: the tilt is decimeters and the texture is 5 cm. 
 3. If a step exists because of a measurement, put the measurement right before it, then "therefore …".
 4. End with what the output is used for, and what this system does NOT do (e.g. "halo builds no map; the map is ours").
 

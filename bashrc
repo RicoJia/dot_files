@@ -600,6 +600,25 @@ unmount_augam() {
   return 0
 }
 
+# Usage: rclone_copy <source> <target> [extra rclone flags...]
+# e.g.   rclone_copy augam_autonsol_searobotics:searobotics/logs/2026-09-03/head_multibeam_sonar \
+#                    ~/volume/raw-data/flops-data/2026-09-03/head_multibeam_sonar
+rclone_copy(){
+  if (( $# < 2 )); then
+    echo "Usage: rclone_copy <source> <target> [extra rclone flags...]" >&2
+    return 1
+  fi
+
+  local src="$1" dst="$2"
+  shift 2
+
+  rclone copy "$src" "$dst" \
+    --progress \
+    --transfers 16 \
+    --checkers 32 \
+    "$@"
+}
+
 update_everything(){
     local errors=0
 
@@ -624,6 +643,16 @@ update_everything(){
         git push origin main
     ) || { echo "ERROR: dot_files repo push failed"; ((errors++)); }
 
+    # --- 3. ~/.claude/skills -> dot_files/my-skills (synced/ is managed by Claude) ---
+    rsync -a --exclude synced "$HOME/.claude/skills/" "$dotfiles_dir/my-skills/" \
+        || { echo "ERROR: copy of Claude skills failed"; ((errors++)); }
+    (
+        cd "$dotfiles_dir"
+        git add my-skills
+        git commit -m "autoupdate skills" || true   # no-op if nothing changed
+        git push origin main
+    ) || { echo "ERROR: dot_files skills push failed"; ((errors++)); }
+
     if ((errors == 0)); then
         echo "update_everything: all done."
     else
@@ -638,6 +667,8 @@ usb_mount_read_only(){
 }
 
 alias vehicle_container_live_debug='docker exec -it -e ROS_DOMAIN_ID=11 vehicle_container bash'
+[ -f ~/.azure_env ] && source ~/.azure_env
+
 
 # Binding navi
 bind -x '"\C-f": navi'
@@ -675,3 +706,13 @@ gdiff(){
 gstatus(){
     git status
 }
+
+
+
+# Android SDK / Android Studio (added 2026-10-17, everything lives under ~/file_exchange_port/tmp)
+export ANDROID_HOME="/home/rjia/file_exchange_port/tmp/Android/Sdk"
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export ANDROID_USER_HOME="/home/rjia/file_exchange_port/tmp/Android/.android"
+export ANDROID_EMULATOR_HOME="$ANDROID_USER_HOME"
+export ANDROID_AVD_HOME="$ANDROID_USER_HOME/avd"
+export PATH="$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:/home/rjia/file_exchange_port/tmp/android-studio/bin:/home/rjia/file_exchange_port/tmp"
