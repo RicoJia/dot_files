@@ -43,7 +43,7 @@ In general don't use words like base in the module names.  Try to keep the modul
 - Do not paste full logs.
 - For command output, summarize root cause only.
 - Keep final responses under 30 lines unless Rico asks for detail.
-- If more detail is needed, ask before expanding.rjia@hammurabi:~/volume/pose_estimate_rico_ws/src$ 
+- If more detail is needed, ask before expanding.
 
 
 ## Naming
@@ -57,6 +57,12 @@ How Rico names things, against the habits he corrects:
 | Leaves the measured dimension vague | Say exactly which quantity | `EFFECTIVE_AREA_CELL_M` -> `EFFECTIVE_AREA_CELL_SIDE_M` |
 | Lets synonyms drift (stack, stacked, mosaic) | One term per concept everywhere: code, comments, docs, config keys | "stacked crops" -> "mosaic crops" |
 | Abbreviates | Spell it out; long and readable beats short jargon | `_2_` -> `_to_`, `boat_a` -> `boat_albedo` |
+| Names a container by its shape (`rows`, `group`, `p`, `objects`) | Put what the data is first: `<nature>_<container>[_by_<key>]` | `rows_by_bag` -> `prediction_rows_by_bag`, `blobs` -> `blob_rows_by_key`, `p` -> `blob_probabilities` |
+| Names a function by its output (`called_units`) | Name the action, verb first | `shown_class_publishes` -> `track_detections` |
+| Mixes words for one thing (observation, detection, prediction) | Use the project's word everywhere | `observations` -> `detections` |
+| Coins a generic or internal term (`unit`, `publish`) | Use the concept already established in the project | `units` -> `encounters`, `publishes` -> `shown_track_positions` |
+| Names a grouping key vaguely (`group`) | Name what the key identifies | `group_key` -> `model_split_key`, `_by_group` -> `_by_model_and_split` |
+| Reuses a word that already means something else here | Pick a term that doesn't collide | groups of detections are not `mosaic`s (mosaic = frame-mosaic crops) |
 
 Also:
 - English word order: subject first, then what about it.

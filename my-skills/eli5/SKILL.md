@@ -14,6 +14,7 @@ description: Explain an algorithm, pipeline or system as a numbered story in exe
 
 ## Wording
 - Plain operational words first ("slide", "fake scores", "blurred copy subtracted"), then the formal term once in parentheses.
+- Name the exact operation, with its reason in a few words: "images encoded as JPEG (to save RAM), then shown", not "stored as JPEG".
 - Give each number its scale or consequence: "tilt is decimeters, texture is 5 cm"; "30 fake scores at 2 per mosaic = 15 mosaics, about 75 s before any loop".
 - One idea per line, nested at most 3 levels deep.
 - Say which component owns each step when there are several (halo vs our map_blobs.py vs the CNN).
