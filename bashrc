@@ -716,3 +716,40 @@ export ANDROID_USER_HOME="/home/rjia/file_exchange_port/tmp/Android/.android"
 export ANDROID_EMULATOR_HOME="$ANDROID_USER_HOME"
 export ANDROID_AVD_HOME="$ANDROID_USER_HOME/avd"
 export PATH="$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:/home/rjia/file_exchange_port/tmp/android-studio/bin:/home/rjia/file_exchange_port/tmp"
+
+# Review every recording with a map in MAP_DIR (<recording>.npz) in object-ojos, with its
+# detections and SLAM track. Each recording is baked once to MAP_DIR/rrd/<recording>.rrd
+# (again when its map or detections are newer); the viewer lists them all and reads each
+# on demand, holding at most 8 GB. Flags go to object_ojos.py when baking.
+# Usage: view_object_ojos <map_dir> [object_ojos flags]
+function view_object_ojos(){
+    local map_dir="${1%/}"
+    if [ ! -d "$map_dir" ]; then
+        echo "Usage: view_object_ojos <map_dir> [object_ojos flags]"
+        return 1
+    fi
+    shift
+    local tools_dir="$HOME/volume/pose_estimate_rico_ws/src/object-detection-tools"
+    local venv="$HOME/.venvs/object-ojos-env/bin"
+    local rrd_dir="$map_dir/rrd" rrd_paths=() map_path name recording_dir rrd_path
+    mkdir -p "$rrd_dir"
+    for map_path in "$map_dir"/*.npz; do
+        name="$(basename "$map_path" .npz)"
+        recording_dir="$HOME/volume/training-ready-data/$name"
+        [ -f "$recording_dir/metadata.json" ] || continue
+        rrd_path="$rrd_dir/$name.rrd"
+        rrd_paths+=("$rrd_path")
+        if [ ! -f "$rrd_path" ] || [ "$map_path" -nt "$rrd_path" ] \
+            || [ "$map_dir/detection_bboxes/$name.json" -nt "$rrd_path" ]; then
+            while [ "$(jobs -rp | wc -l)" -ge 6 ]; do wait -n; done
+            echo "baking $name (log: $rrd_dir/$name.log)"
+            ( "$venv/python" "$tools_dir/object-ojos/object_ojos.py" "$recording_dir" \
+                --map "$map_dir" --locations "$tools_dir/asset_locations.csv" \
+                --save "$rrd_dir/.$name.rrd" "$@" > "$rrd_dir/$name.log" 2>&1 \
+                && mv "$rrd_dir/.$name.rrd" "$rrd_path" ) &
+        fi
+    done
+    wait
+    echo "${#rrd_paths[@]} recordings"
+    "$venv/rerun" --memory-limit 8GB --port auto "${rrd_paths[@]}"
+}
